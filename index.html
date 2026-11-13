@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduRecord AI - Centralised Student Activity Record Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/verification.css">
+    <link rel="stylesheet" href="css/print.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">ER</div>
+                <div>
+                    <div class="brand-title">EduRecord AI</div>
+                    <div class="brand-subtitle">Student Record Platform</div>
+                </div>
+            </div>
+
+            <div class="nav-section">Portals & Views</div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-view="student" onclick="window.app.switchUserRole('STUDENT')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    Student Portal
+                </div>
+                <div class="nav-item" data-view="faculty" onclick="window.app.switchUserRole('FACULTY')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="18" y1="8" x2="23" y2="13"></line><line x1="23" y1="8" x2="18" y2="13"></line></svg>
+                    Faculty Review Queue
+                </div>
+                <div class="nav-item" data-view="admin" onclick="window.app.switchUserRole('ADMIN')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Institution Analytics (Admin)
+                </div>
+            </nav>
+
+            <div class="nav-section">Direct Tools</div>
+            <nav class="sidebar-nav">
+                <div class="nav-item" onclick="window.app.openPortfolio(apiService.getCurrentUser().id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    Official e-Portfolio
+                </div>
+                <div class="nav-item" onclick="window.adminView.exportAccreditationReport()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    NAAC / NBA Summary
+                </div>
+            </nav>
+
+            <!-- Quick Role Switcher for Demo -->
+            <div class="sidebar-footer">
+                <div class="demo-role-switcher">
+                    <span class="demo-role-label">Switch Active Demo Role:</span>
+                    <select id="demoRoleSelect" class="role-select-input">
+                        <option value="STUDENT">Student (Aarav Sharma)</option>
+                        <option value="FACULTY">Faculty (Dr. Priya Nair)</option>
+                        <option value="ADMIN">Dean / Admin (Prof. Verma)</option>
+                    </select>
+                </div>
+                <div style="font-size: 0.7rem; color: #64748b; text-align: center;">
+                    AI Verification Pipeline &bull; v2.4
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <main class="main-wrapper">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <div id="topbarRoleBadge" class="role-badge-pill role-badge-student">
+                        <span class="pulse-dot"></span> Student Portal
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--gray-400);">|</span>
+                    <span style="font-size: 0.8rem; color: var(--gray-500); font-weight: 500;">
+                        National Institute of Technology & Engineering (NAAC A++)
+                    </span>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-profile-badge">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="User Avatar" class="user-avatar" id="topbarUserAvatar">
+                        <div>
+                            <div class="user-name" id="topbarUserName">Aarav Sharma</div>
+                            <div class="user-role-sub" id="topbarUserDept">2023CSE042 &bull; CSE Dept</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Container (Rendered by active role controller) -->
+            <div class="page-content" id="pageContainer">
+                <!-- Injected via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+         MODALS
+         ========================================================================== -->
+
+    <!-- 1. Submit Activity & Upload Certificate Modal -->
+    <div class="modal-backdrop" id="submitModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Upload & Verify Student Activity Certificate</div>
+                <button class="modal-close" onclick="window.studentView.closeSubmitModal()">&times;</button>
+            </div>
+            <form id="submitActivityForm" onsubmit="window.studentView.handleUploadAndVerify(event)">
+                <div class="modal-body">
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display:block; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
+                            Activity Title / Achievement *
+                        </label>
+                        <input type="text" id="formTitle" class="search-input" style="width: 100%;" required placeholder="e.g. AWS Certified Solutions Architect / SIH Grand Finale">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label style="display:block; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
+                                Activity Category *
+                            </label>
+                            <select id="formCategory" class="filter-select" style="width: 100%;" required>
+                                <option value="TECHNICAL">Technical Competitions & Hackathons</option>
+                                <option value="COURSES">Certifications & MOOCs</option>
+                                <option value="INTERNSHIP">Internships & Industrial Training</option>
+                                <option value="SPORTS">Sports & Athletics</option>
+                                <option value="CULTURAL">Cultural & Arts</option>
+                                <option value="VOLUNTEERING">Volunteering & NSS/NCC</option>
+                                <option value="RESEARCH">Research Publications & Patents</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
+                                Hours Spent / Activity Credits
+                            </label>
+                            <input type="number" id="formHours" class="search-input" style="width: 100%;" value="20" min="1">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label style="display:block; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
+                                Issuing Organization / Body *
+                            </label>
+                            <input type="text" id="formOrganization" class="search-input" style="width: 100%;" required placeholder="e.g. IIT Madras, Amazon, Ministry of Education">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
+                                Completion / Event Date *
+                            </label>
+                            <input type="date" id="formEventDate" class="search-input" style="width: 100%;" required value="2026-02-15">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display:block; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
+                            Short Description / Outcome
+                        </label>
+                        <textarea id="formDescription" rows="2" class="search-input" style="width: 100%;" placeholder="Briefly describe what you built, learned, or achieved..."></textarea>
+                    </div>
+
+                    <!-- Dropzone -->
+                    <div>
+                        <label style="display:block; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
+                            Upload Certificate Document (PDF or Image) *
+                        </label>
+                        <div class="upload-dropzone" onclick="document.getElementById('certFileInput').click()">
+                            <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <div class="dropzone-title">Click to upload or drag & drop</div>
+                            <div class="dropzone-sub">Supported formats: PDF, JPG, PNG &bull; Max 10MB</div>
+                            <input type="file" id="certFileInput" style="display:none" accept=".pdf,image/*" onchange="window.studentView.handleFileSelect(this)">
+                            <div id="selectedFileName" style="display:none; margin-top: 10px; font-size: 0.85rem; color: var(--primary);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="window.studentView.closeSubmitModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                        Start AI Verification & Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Live AI Verification Pipeline Modal -->
+    <div class="modal-backdrop" id="pipelineModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">AI Certificate Verification Pipeline Running</div>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--gray-600); margin-bottom: 1.25rem;">
+                    Executing the 6-step automated verification workflow: SHA-256 hash collision check, OCR extraction, AI entity recognition, rule validation, and routing decision.
+                </p>
+                <div class="pipeline-container">
+                    <div class="pipeline-steps" id="pipelineStepsContainer">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div id="pipelineResultArea" style="display: none;">
+                    <!-- Result card injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Faculty Side-by-Side Review Modal -->
+    <div class="modal-backdrop" id="reviewModal">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <div class="modal-title">Human-in-the-Loop Review Desk</div>
+                <button class="modal-close" onclick="window.facultyView.closeReviewModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="reviewModalBody">
+                <!-- Injected via facultyView.js -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="window.facultyView.closeReviewModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="window.facultyView.submitDecision('REJECTED')">
+                    &times; Reject Submission
+                </button>
+                <button class="btn btn-success" onclick="window.facultyView.submitDecision('FACULTY_APPROVED')">
+                    &check; Approve & Award NAAC Credits
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Detail Audit Inspection Modal -->
+    <div class="modal-backdrop" id="inspectModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Verification Audit Record</div>
+                <button class="modal-close" onclick="window.app.closeInspectModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="inspectModalBody">
+                <!-- Injected via app.js -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="window.app.closeInspectModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Threshold Tuning Modal (Admin) -->
+    <div class="modal-backdrop" id="thresholdModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Tune AI Verification Decision Thresholds</div>
+                <button class="modal-close" onclick="window.adminView.closeThresholdModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--gray-600); margin-bottom: 1.5rem;">
+                    Configure routing parameters for the AI Verification Engine (Section 5 & 6 of Research Specification).
+                </p>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div class="flex justify-between items-center" style="margin-bottom: 6px;">
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--gray-800);">
+                            Auto-Approval Threshold (&gt;= Min Score)
+                        </label>
+                        <span id="autoApproveVal" style="font-weight: 800; color: var(--success);">85%</span>
+                    </div>
+                    <input type="range" id="autoApproveSlider" min="70" max="98" value="85" style="width: 100%;" oninput="document.getElementById('autoApproveVal').innerText = this.value + '%'">
+                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">
+                        Submissions scoring equal or above this are auto-approved without faculty intervention.
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div class="flex justify-between items-center" style="margin-bottom: 6px;">
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--gray-800);">
+                            Faculty Review Queue Min Threshold
+                        </label>
+                        <span id="facultyQueueVal" style="font-weight: 800; color: var(--warning);">50%</span>
+                    </div>
+                    <input type="range" id="facultyQueueSlider" min="30" max="75" value="50" style="width: 100%;" oninput="document.getElementById('facultyQueueVal').innerText = this.value + '%'">
+                    <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">
+                        Submissions between this threshold and Auto-Approval are routed to departmental faculty coordinators. Below this score is flagged or rejected.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="window.adminView.closeThresholdModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="window.adminView.saveThresholds()">Save Calibration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/mockData.js"></script>
+    <script src="js/aiVerification.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/studentView.js"></script>
+    <script src="js/facultyView.js"></script>
+    <script src="js/adminView.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
